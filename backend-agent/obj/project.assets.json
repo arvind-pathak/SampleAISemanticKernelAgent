@@ -798,11 +798,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\WorkSpace\\AgenticAILearnings\\SampleAIAgentWithSkill\\backend-agent\\backend-agent.csproj",
+      "projectUniqueName": "C:\\WorkSpace\\AgenticAILearnings\\SampleAISemanticKernelAgent\\SampleAISemanticKernelAgent\\backend-agent\\backend-agent.csproj",
       "projectName": "backend-agent",
-      "projectPath": "C:\\WorkSpace\\AgenticAILearnings\\SampleAIAgentWithSkill\\backend-agent\\backend-agent.csproj",
+      "projectPath": "C:\\WorkSpace\\AgenticAILearnings\\SampleAISemanticKernelAgent\\SampleAISemanticKernelAgent\\backend-agent\\backend-agent.csproj",
       "packagesPath": "C:\\Users\\APathak\\.nuget\\packages\\",
-      "outputPath": "C:\\WorkSpace\\AgenticAILearnings\\SampleAIAgentWithSkill\\backend-agent\\obj\\",
+      "outputPath": "C:\\WorkSpace\\AgenticAILearnings\\SampleAISemanticKernelAgent\\SampleAISemanticKernelAgent\\backend-agent\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

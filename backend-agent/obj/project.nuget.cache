@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rBI1czVmRxw=",
+  "dgSpecHash": "1tjLCas8IHg=",
   "success": true,
-  "projectFilePath": "C:\\WorkSpace\\AgenticAILearnings\\SampleAIAgentWithSkill\\backend-agent\\backend-agent.csproj",
+  "projectFilePath": "C:\\WorkSpace\\AgenticAILearnings\\SampleAISemanticKernelAgent\\SampleAISemanticKernelAgent\\backend-agent\\backend-agent.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\APathak\\.nuget\\packages\\azure.ai.openai\\2.9.0-beta.1\\azure.ai.openai.2.9.0-beta.1.nupkg.sha512",
     "C:\\Users\\APathak\\.nuget\\packages\\azure.core\\1.51.1\\azure.core.1.51.1.nupkg.sha512",

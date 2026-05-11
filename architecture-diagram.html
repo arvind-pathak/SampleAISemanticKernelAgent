@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1500"/>
+<title>HR AI Agent v2 Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: #f0f4f8;
+    padding: 28px;
+    width: 1500px;
+  }
+
+  /* ── HEADER ── */
+  .page-title {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .page-sub {
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 22px;
+    font-style: italic;
+  }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 230px 1fr 250px 280px;
+    grid-template-rows: auto auto;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* ── CARD BASE ── */
+  .card {
+    border-radius: 12px;
+    padding: 16px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  /* ── 1. ANGULAR UI ── */
+  .ui-card {
+    background: linear-gradient(160deg, #e8f0fe 0%, #d4e6ff 100%);
+    border: 2px solid #4285f4;
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .ui-card .section-label { color: #1a56cc; }
+  .ui-card .section-title { color: #1a56cc; font-size: 14px; }
+
+  .chat-mockup {
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #c5d9f7;
+    margin-bottom: 10px;
+  }
+  .chat-header {
+    background: #1a56cc;
+    color: #fff;
+    border-radius: 6px 6px 0 0;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 8px;
+    margin: -10px -10px 8px -10px;
+  }
+  .bubble { border-radius: 10px; padding: 6px 8px; font-size: 10px; margin-bottom: 5px; max-width: 90%; }
+  .bubble-user { background: #e8eaf6; color: #333; margin-left: auto; }
+  .bubble-bot  { background: #1a56cc; color: #fff; }
+  .chat-input {
+    display: flex; gap: 4px; margin-top: 6px;
+  }
+  .chat-input-box {
+    flex: 1; border: 1px solid #c5d9f7; border-radius: 6px;
+    font-size: 9px; padding: 4px 6px; color: #888;
+  }
+  .chat-send {
+    background: #1a56cc; color: #fff; border: none;
+    border-radius: 6px; padding: 4px 8px; font-size: 10px; font-weight: 700;
+  }
+
+  .checkmark-list { list-style: none; font-size: 10.5px; color: #333; }
+  .checkmark-list li::before { content: '✓ '; color: #1a56cc; font-weight: 700; }
+  .checkmark-list li { margin-bottom: 3px; }
+
+  .cloud-badge {
+    margin-top: 10px;
+    background: #1a56cc;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 4px 8px;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── 2. .NET AGENT CORE ── */
+  .agent-card {
+    background: linear-gradient(160deg, #e8f5e9 0%, #dff0e8 100%);
+    border: 2px solid #2e7d32;
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .agent-card .section-label { color: #2e7d32; }
+  .agent-card .section-title { color: #1b5e20; font-size: 15px; }
+
+  .sk-banner {
+    background: linear-gradient(90deg, #2e7d32, #388e3c);
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .flow-step {
+    background: #fff;
+    border: 1.5px solid #a5d6a7;
+    border-radius: 10px;
+    padding: 8px 6px;
+    text-align: center;
+    flex: 1;
+    font-size: 9px;
+    color: #1b5e20;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .flow-step .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .flow-arrow {
+    font-size: 18px;
+    color: #2e7d32;
+    flex-shrink: 0;
+  }
+
+  .agent-responsibilities {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .resp-item {
+    font-size: 10px;
+    color: #2e7d32;
+    background: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    padding: 5px 7px;
+    border-left: 3px solid #4caf50;
+  }
+  .resp-item::before { content: '✓ '; font-weight: 700; }
+
+  /* ── 3. PLUGINS CARD ── */
+  .plugins-card {
+    background: linear-gradient(160deg, #fff8e1 0%, #fdf3c0 100%);
+    border: 2px solid #f59e0b;
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .plugins-card .section-label { color: #b45309; }
+  .plugins-card .section-title { color: #92400e; }
+
+  .plugin-grid {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .plugin-box {
+    background: #fff;
+    border: 1.5px solid #fcd34d;
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+    flex: 1;
+  }
+  .plugin-icon { font-size: 26px; margin-bottom: 6px; display: block; }
+  .plugin-name {
+    font-size: 12px; font-weight: 800; color: #92400e; margin-bottom: 4px;
+  }
+  .plugin-desc {
+    font-size: 9px; color: #78350f; margin-bottom: 8px; line-height: 1.4;
+  }
+  .plugin-fn {
+    background: #fef3c7; border-radius: 5px; padding: 3px 5px;
+    font-size: 8.5px; font-family: 'Courier New', monospace;
+    color: #92400e; font-weight: 600; margin-bottom: 2px; text-align: left;
+  }
+  .plugin-decorator {
+    font-size: 8px; color: #b45309; font-family: 'Courier New', monospace;
+    background: #fef9ee; border-radius: 4px; padding: 2px 5px; margin-bottom: 4px;
+    display: inline-block;
+  }
+
+  .skill-note {
+    background: rgba(255,255,255,0.7);
+    border: 1px dashed #f59e0b;
+    border-radius: 8px;
+    font-size: 9.5px;
+    color: #78350f;
+    padding: 6px 10px;
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* ── 4. AZURE OPENAI ── */
+  .llm-card {
+    background: linear-gradient(160deg, #ede7f6 0%, #e1d5f5 100%);
+    border: 2px solid #7c3aed;
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .llm-card .section-label { color: #5b21b6; }
+  .llm-card .section-title { color: #4c1d95; font-size: 13px; }
+
+  .llm-logo {
+    text-align: center;
+    font-size: 42px;
+    margin: 6px 0 8px;
+  }
+  .llm-tag {
+    display: inline-block;
+    background: #7c3aed;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    margin: 2px auto;
+  }
+  .llm-tags { text-align: center; margin-bottom: 10px; }
+
+  .llm-list { list-style: none; font-size: 10px; color: #4c1d95; }
+  .llm-list li { margin-bottom: 4px; padding-left: 16px; position: relative; line-height: 1.3; }
+  .llm-list li::before { content: '✓'; position: absolute; left: 0; color: #7c3aed; font-weight: 700; }
+
+  .llm-cloud-badge {
+    margin-top: 10px;
+    background: linear-gradient(90deg, #7c3aed, #6d28d9);
+    color: #fff;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 5px 8px;
+    text-align: center;
+  }
+
+  /* ── 5. MOCK DATA ── */
+  .data-card {
+    background: linear-gradient(160deg, #e3f2fd 0%, #d0eaff 100%);
+    border: 2px solid #1976d2;
+    grid-column: 3;
+    grid-row: 2;
+  }
+  .data-card .section-label { color: #0d47a1; }
+  .data-card .section-title { color: #0d47a1; font-size: 13px; }
+
+  .json-block {
+    background: #0d1117;
+    color: #7ee787;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .json-key { color: #79c0ff; }
+  .json-val { color: #a8d8a8; }
+
+  .data-note {
+    background: rgba(255,255,255,0.8);
+    border-radius: 6px;
+    font-size: 9px;
+    color: #0d47a1;
+    padding: 5px 8px;
+    border-left: 3px solid #1976d2;
+  }
+
+  /* ── KEY POINTS ── */
+  .key-card {
+    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+    border: none;
+    grid-column: 4;
+    grid-row: 1 / 3;
+    color: #fff;
+  }
+  .key-card .section-title { color: #fff; font-size: 15px; border-bottom: 2px solid #4285f4; padding-bottom: 8px; }
+
+  .kp-section { margin-bottom: 14px; }
+  .kp-heading {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .kp-heading .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .kp-list { list-style: none; font-size: 10px; color: #cdd5e0; }
+  .kp-list li { margin-bottom: 3px; padding-left: 14px; position: relative; line-height: 1.4; }
+  .kp-list li::before { content: '•'; position: absolute; left: 0; }
+
+  .vs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .vs-box {
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 9px;
+  }
+  .vs-box.before {
+    background: rgba(220, 38, 38, 0.15);
+    border: 1px solid rgba(220,38,38,0.4);
+  }
+  .vs-box.after {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34,197,94,0.4);
+  }
+  .vs-label {
+    font-weight: 800; font-size: 9px; margin-bottom: 5px;
+    letter-spacing: 0.5px;
+  }
+  .vs-box.before .vs-label { color: #f87171; }
+  .vs-box.after  .vs-label { color: #4ade80; }
+  .vs-item { color: #e2e8f0; margin-bottom: 3px; line-height: 1.3; }
+  .vs-item::before { content: '→ '; opacity: 0.6; }
+
+  .badge {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 8.5px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .badge-goal     { background: #f59e0b; color: #1a1a2e; }
+  .badge-concepts { background: #3b82f6; color: #fff; }
+  .badge-shows    { background: #10b981; color: #fff; }
+  .badge-v2       { background: #8b5cf6; color: #fff; }
+  .badge-azure    { background: #0078d4; color: #fff; }
+
+  /* ── UI CARD on row 2 ── */
+  .ui-bottom-card {
+    background: linear-gradient(160deg, #e8f0fe 0%, #d4e6ff 100%);
+    border: 2px solid #4285f4;
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .ui-bottom-card .section-label { color: #1a56cc; }
+  .ui-bottom-card .section-title { color: #1a56cc; font-size: 13px; }
+
+  .multi-turn-box {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #c5d9f7;
+    padding: 8px;
+    font-size: 10px;
+    color: #1a56cc;
+    margin-bottom: 8px;
+  }
+  .multi-turn-box .title { font-weight: 700; margin-bottom: 5px; }
+  .turn-line { display: flex; gap: 6px; align-items: center; margin-bottom: 3px; }
+  .turn-label { background: #1a56cc; color: #fff; border-radius: 4px; font-size: 8px; padding: 1px 5px; font-weight: 700; white-space: nowrap; }
+  .turn-text { font-size: 9.5px; color: #333; }
+
+  /* ── ARROWS BETWEEN SECTIONS ── */
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #6b7280;
+    gap: 4px;
+  }
+  .arrow-label { font-size: 8.5px; color: #6b7280; text-align: center; font-weight: 600; }
+
+  /* ── FLOW SECTION ── */
+  .flow-section {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+  }
+  .flow-section-title {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .e2e-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+  }
+  .e2e-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+  .e2e-circle {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
+  .e2e-num {
+    font-size: 8px; font-weight: 800; color: #9ca3af; margin-bottom: 3px;
+  }
+  .e2e-label {
+    font-size: 10px; font-weight: 700; color: #fff; margin-bottom: 3px; text-align: center;
+  }
+  .e2e-desc {
+    font-size: 8.5px; color: #9ca3af; text-align: center; line-height: 1.3; max-width: 110px;
+  }
+  .e2e-arrow {
+    color: #4b5563;
+    font-size: 22px;
+    margin-top: 10px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    padding-top: 10px;
+  }
+
+  /* ── TECH STACK ── */
+  .tech-stack {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    flex-wrap: wrap;
+  }
+  .tech-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #1a1a2e;
+    border: 2px solid #1a1a2e;
+    border-radius: 8px;
+    padding: 5px 12px;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+  }
+  .tech-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .tech-icon { font-size: 26px; }
+  .tech-name { font-size: 9.5px; font-weight: 700; color: #374151; text-align: center; }
+  .tech-sub  { font-size: 8px; color: #6b7280; text-align: center; }
+
+  .divider { width: 1px; height: 40px; background: #e5e7eb; flex-shrink: 0; }
+
+  /* connection arrows overlay */
+  .rel-arrows {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .conn-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .conn-box {
+    background: #fff;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+  }
+  .conn-arrow {
+    font-size: 18px; color: #6b7280;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .conn-arrow-label { font-size: 8px; color: #9ca3af; white-space: nowrap; }
+
+  /* Separator between sections */
+  .section-sep {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #4b5563;
+  }
+  .section-sep-label { font-size: 8.5px; font-weight: 700; color: #6b7280; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- TITLE -->
+<div class="page-title">Employee Support AI Agent v2 – Architecture &amp; Key Points</div>
+<div class="page-sub">Rebuilt with Semantic Kernel ChatCompletionAgent · Azure OpenAI GPT-4o-mini · KernelFunction Plugins · Azure Cloud Deployment</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+
+  <!-- 1. ANGULAR UI (row 1) -->
+  <div class="card ui-card">
+    <div class="section-label">1. FRONTEND</div>
+    <div class="section-title">Angular 21 Chat UI</div>
+    <div class="chat-mockup">
+      <div class="chat-header">🤖 Employee Support Agent</div>
+      <div class="bubble bubble-user">How many leaves does John have?</div>
+      <div class="bubble bubble-bot">John has 12 leave days remaining.<br/><span style="font-size:8px;opacity:0.8;">[Powered by: HRPlugin → leave/SKILL.md]</span></div>
+      <div class="chat-input">
+        <div class="chat-input-box">Type your message…</div>
+        <button class="chat-send">➤</button>
+      </div>
+    </div>
+    <ul class="checkmark-list">
+      <li>Angular 21 Zoneless (Signals)</li>
+      <li>Environment-based API URL</li>
+      <li>Multi-turn conversation UI</li>
+      <li>Skill attribution shown</li>
+    </ul>
+    <div class="cloud-badge">☁ Azure Static Web Apps<br/>green-hill-0b259a703.7.azurestaticapps.net</div>
+  </div>
+
+  <!-- 2. .NET AGENT CORE (row 1) -->
+  <div class="card agent-card">
+    <div class="section-label">2. BACKEND — AI AGENT CORE</div>
+    <div class="section-title">.NET 10 AI Agent API + Semantic Kernel</div>
+    <div class="sk-banner">🧠 Semantic Kernel — ChatCompletionAgent + FunctionChoiceBehavior.Auto()</div>
+
+    <div class="flow-row">
+      <div class="flow-step"><span class="icon">💬</span>Receive<br/>User Message</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="icon">🧠</span>Understand<br/>Intent (LLM)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="icon">🔧</span>Auto-Select<br/>&amp; Invoke Plugin</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="icon">✅</span>Generate<br/>Response</div>
+    </div>
+
+    <div class="agent-responsibilities">
+      <div class="resp-item">ChatCompletionAgent object (proper agent)</div>
+      <div class="resp-item">FunctionChoiceBehavior.Auto() — no manual routing</div>
+      <div class="resp-item">Per-session ChatHistory (multi-turn memory)</div>
+      <div class="resp-item">agent-instructions.md as system prompt</div>
+      <div class="resp-item">KernelFunction Plugins registered at startup</div>
+      <div class="resp-item">ASP.NET Core Web API — ChatController</div>
+    </div>
+  </div>
+
+  <!-- 3. AZURE OPENAI (row 1) -->
+  <div class="card llm-card">
+    <div class="section-label">3. CLOUD LLM</div>
+    <div class="section-title">Azure OpenAI<br/>GPT-4o-mini</div>
+    <div class="llm-logo">☁️🤖</div>
+    <div class="llm-tags">
+      <span class="llm-tag">GPT-4o-mini</span>&nbsp;
+      <span class="llm-tag">Azure Hosted</span>
+    </div>
+    <ul class="llm-list">
+      <li>Cloud-based, no local model</li>
+      <li>Reliable tool / function calling</li>
+      <li>Semantic reasoning</li>
+      <li>Decides which plugin to use</li>
+      <li>Reads [KernelFunction] descriptions</li>
+      <li>Generates natural language response</li>
+    </ul>
+    <div class="llm-cloud-badge">
+      🔑 Endpoint &amp; ApiKey via<br/>App Service Environment Variables
+    </div>
+  </div>
+
+  <!-- KEY POINTS (rows 1-2) -->
+  <div class="card key-card">
+    <div class="section-title">KEY POINTS</div>
+
+    <div class="kp-section">
+      <div class="kp-heading"><span class="dot" style="background:#f59e0b"></span><span class="badge badge-goal">GOAL</span></div>
+      <ul class="kp-list">
+        <li>Show how a proper AI Agent uses Plugins (not manual skill routing) to answer HR questions</li>
+        <li>Deployed end-to-end on Azure</li>
+      </ul>
+    </div>
+
+    <div class="kp-section">
+      <div class="kp-heading"><span class="dot" style="background:#8b5cf6"></span><span class="badge badge-v2">v1 → v2 CHANGES</span></div>
+      <div class="vs-row">
+        <div class="vs-box before">
+          <div class="vs-label">❌ v1 (OLD)</div>
+          <div class="vs-item">Ollama Phi3 (local)</div>
+          <div class="vs-item">Manual 2-stage routing</div>
+          <div class="vs-item">No agent object</div>
+          <div class="vs-item">LeaveSkill / EmployeeSkill.cs</div>
+          <div class="vs-item">No multi-turn memory</div>
+          <div class="vs-item">Local only (no cloud)</div>
+        </div>
+        <div class="vs-box after">
+          <div class="vs-label">✅ v2 (NOW)</div>
+          <div class="vs-item">Azure OpenAI GPT-4o-mini</div>
+          <div class="vs-item">FunctionChoiceBehavior.Auto()</div>
+          <div class="vs-item">ChatCompletionAgent</div>
+          <div class="vs-item">HRPlugin / GreetingPlugin</div>
+          <div class="vs-item">ChatHistory per session</div>
+          <div class="vs-item">Azure App Service + SWA</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kp-section">
+      <div class="kp-heading"><span class="dot" style="background:#10b981"></span><span class="badge badge-shows">WHAT IT SHOWS</span></div>
+      <ul class="kp-list">
+        <li>LLM reads [KernelFunction] descriptions</li>
+        <li>LLM auto-selects the right plugin method</li>
+        <li>Plugin executes and reads mock data</li>
+        <li>Result returned to LLM for final answer</li>
+        <li>Response includes [Powered by] attribution</li>
+        <li>Multi-turn memory across messages</li>
+      </ul>
+    </div>
+
+    <div class="kp-section">
+      <div class="kp-heading"><span class="dot" style="background:#0078d4"></span><span class="badge badge-azure">AZURE DEPLOYMENT</span></div>
+      <ul class="kp-list">
+        <li>Backend → Azure App Service (Linux, .NET 10)</li>
+        <li>Frontend → Azure Static Web Apps (Free)</li>
+        <li>LLM → Azure AI Foundry (GPT-4o-mini)</li>
+        <li>CORS configured, environment vars set</li>
+        <li>Resource Group: rg-hr-agent-arvind</li>
+      </ul>
+    </div>
+
+    <div class="kp-section">
+      <div class="kp-heading"><span class="dot" style="background:#f87171"></span><span style="color:#f87171;font-size:10px;font-weight:800;">✗ NOT INCLUDED (MVP SCOPE)</span></div>
+      <ul class="kp-list">
+        <li>No real database (mock JSON)</li>
+        <li>No authentication / AAD</li>
+        <li>No vector DB / RAG</li>
+        <li>No multi-agent orchestration</li>
+        <li>No MCP server</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SESSION / MULTI-TURN (row 2 col 1) -->
+  <div class="card ui-bottom-card">
+    <div class="section-label">SESSION MEMORY</div>
+    <div class="section-title">Multi-Turn ChatHistory</div>
+    <div class="multi-turn-box">
+      <div class="title">Per-Session Conversation Memory</div>
+      <div class="turn-line">
+        <span class="turn-label">Turn 1</span>
+        <span class="turn-text">How many leaves does John have?</span>
+      </div>
+      <div class="turn-line">
+        <span class="turn-label">Agent</span>
+        <span class="turn-text">John has 12 leave days remaining.</span>
+      </div>
+      <div class="turn-line">
+        <span class="turn-label">Turn 2</span>
+        <span class="turn-text">What about his department?</span>
+      </div>
+      <div class="turn-line">
+        <span class="turn-label">Agent</span>
+        <span class="turn-text">John works in IT (remembers context)</span>
+      </div>
+    </div>
+    <ul class="checkmark-list">
+      <li>ConcurrentDictionary&lt;sessionId, ChatHistory&gt;</li>
+      <li>Default sessionId = "default"</li>
+      <li>Agent remembers prior turns</li>
+    </ul>
+  </div>
+
+  <!-- PLUGINS (row 2 col 2) -->
+  <div class="card plugins-card">
+    <div class="section-label">4. PLUGINS — KERNELFUNCTION TOOLS</div>
+    <div class="section-title">HRPlugin &amp; GreetingPlugin</div>
+
+    <div class="plugin-grid">
+      <div class="plugin-box">
+        <span class="plugin-icon">👥</span>
+        <div class="plugin-decorator">[KernelFunction]</div>
+        <div class="plugin-name">HRPlugin</div>
+        <div class="plugin-desc">HR data access — leave balances &amp; employee profiles</div>
+        <div class="plugin-fn">GetLeaveBalance(employeeName)</div>
+        <div class="plugin-fn">GetEmployeeInfo(employeeName)</div>
+        <div style="font-size:8px;color:#78350f;margin-top:4px;line-height:1.3">
+          Synonyms: leave / holiday / vacation / PTO / annual leave → same function
+        </div>
+      </div>
+      <div class="plugin-box">
+        <span class="plugin-icon">👋</span>
+        <div class="plugin-decorator">[KernelFunction]</div>
+        <div class="plugin-name">GreetingPlugin</div>
+        <div class="plugin-desc">Handles greetings and social conversation</div>
+        <div class="plugin-fn">SayHello()</div>
+        <div style="font-size:8px;color:#78350f;margin-top:4px;line-height:1.3">
+          Triggers: hi, hello, hey, good morning, howdy…
+        </div>
+      </div>
+      <div class="plugin-box">
+        <span class="plugin-icon">📋</span>
+        <div style="font-size:8px;font-style:italic;color:#92400e;margin-bottom:6px;">system prompt file</div>
+        <div class="plugin-name">agent-instructions.md</div>
+        <div class="plugin-desc">Agent persona, rules, synonym mapping loaded at startup</div>
+        <div class="plugin-fn">Skills/agent-instructions.md</div>
+        <div style="font-size:8px;color:#78350f;margin-top:4px;line-height:1.3">
+          HR persona · tone rules · synonym table
+        </div>
+      </div>
+    </div>
+    <div class="skill-note">
+      Each KernelFunction carries a [Description] attribute — GPT-4o-mini reads these to decide which function to call automatically (no manual routing code needed)
+    </div>
+  </div>
+
+  <!-- MOCK DATA (row 2 col 3) -->
+  <div class="card data-card">
+    <div class="section-label">5. MOCK DATA</div>
+    <div class="section-title">employees.json</div>
+    <div class="json-block">
+{<br/>
+&nbsp;&nbsp;<span class="json-key">"John"</span>: {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"department"</span>: <span class="json-val">"IT"</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"team"</span>: <span class="json-val">"Backend"</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"leaveBalance"</span>: <span class="json-val">12</span><br/>
+&nbsp;&nbsp;},<br/>
+&nbsp;&nbsp;<span class="json-key">"Sarah"</span>: {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"department"</span>: <span class="json-val">"Finance"</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"leaveBalance"</span>: <span class="json-val">8</span><br/>
+&nbsp;&nbsp;}<br/>
+}
+    </div>
+    <div class="data-note">
+      Read by HRPlugin at startup (no database). Injected into Kernel via constructor.<br/><br/>
+      <strong>No DB · No Auth · No Vector DB</strong><br/>Simple JSON for learning purposes.
+    </div>
+  </div>
+
+</div><!-- /main-grid -->
+
+<!-- END TO END FLOW -->
+<div class="flow-section">
+  <div class="flow-section-title">END TO END FLOW</div>
+  <div class="e2e-row">
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#1e3a5f">👤</div>
+      <div class="e2e-num">1.</div>
+      <div class="e2e-label">User Asks</div>
+      <div class="e2e-desc">Types question in Angular UI</div>
+    </div>
+    <div class="e2e-arrow">→</div>
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#1a3a2a">📡</div>
+      <div class="e2e-num">2.</div>
+      <div class="e2e-label">HTTP POST</div>
+      <div class="e2e-desc">Angular sends to /api/chat with sessionId</div>
+    </div>
+    <div class="e2e-arrow">→</div>
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#2d1b69">🧠</div>
+      <div class="e2e-num">3.</div>
+      <div class="e2e-label">ChatCompletionAgent</div>
+      <div class="e2e-desc">Receives message + ChatHistory + registered plugins</div>
+    </div>
+    <div class="e2e-arrow">→</div>
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#1e3a5f">☁️</div>
+      <div class="e2e-num">4.</div>
+      <div class="e2e-label">Azure OpenAI</div>
+      <div class="e2e-desc">GPT-4o-mini reads function descriptions, selects best plugin</div>
+    </div>
+    <div class="e2e-arrow">→</div>
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#422006">🔧</div>
+      <div class="e2e-num">5.</div>
+      <div class="e2e-label">Plugin Executes</div>
+      <div class="e2e-desc">HRPlugin reads employees.json, returns data</div>
+    </div>
+    <div class="e2e-arrow">→</div>
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#2d1b69">🔄</div>
+      <div class="e2e-num">6.</div>
+      <div class="e2e-label">Result → LLM</div>
+      <div class="e2e-desc">Tool result returned to GPT-4o-mini for final synthesis</div>
+    </div>
+    <div class="e2e-arrow">→</div>
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#1a3a2a">💬</div>
+      <div class="e2e-num">7.</div>
+      <div class="e2e-label">Natural Language</div>
+      <div class="e2e-desc">LLM generates human-friendly response with attribution</div>
+    </div>
+    <div class="e2e-arrow">→</div>
+    <div class="e2e-step">
+      <div class="e2e-circle" style="background:#1e3a5f">📱</div>
+      <div class="e2e-num">8.</div>
+      <div class="e2e-label">UI Displays</div>
+      <div class="e2e-desc">Angular shows response with [Powered by] tag</div>
+    </div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="tech-stack">
+  <div class="tech-label">TECH STACK</div>
+  <div class="tech-item">
+    <div class="tech-icon">🅰</div>
+    <div class="tech-name">Angular 21</div>
+    <div class="tech-sub">Zoneless UI</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">🟣</div>
+    <div class="tech-name">.NET 10</div>
+    <div class="tech-sub">ASP.NET Core</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">🧠</div>
+    <div class="tech-name">Semantic Kernel</div>
+    <div class="tech-sub">Microsoft SK 1.x</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">☁️</div>
+    <div class="tech-name">Azure OpenAI</div>
+    <div class="tech-sub">GPT-4o-mini</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">🔧</div>
+    <div class="tech-name">KernelFunction</div>
+    <div class="tech-sub">Plugins (Tools)</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">🤖</div>
+    <div class="tech-name">ChatCompletionAgent</div>
+    <div class="tech-sub">Proper Agent Object</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">🌐</div>
+    <div class="tech-name">Azure App Service</div>
+    <div class="tech-sub">Backend (Linux)</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">⚡</div>
+    <div class="tech-name">Azure Static Web Apps</div>
+    <div class="tech-sub">Frontend (Free tier)</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">📄</div>
+    <div class="tech-name">Mock JSON Data</div>
+    <div class="tech-sub">employees.json</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tech-item">
+    <div class="tech-icon">🔌</div>
+    <div class="tech-name">REST API</div>
+    <div class="tech-sub">POST /api/chat</div>
+  </div>
+</div>
+
+</body>
+</html>

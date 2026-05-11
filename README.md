@@ -364,4 +364,6 @@ SampleAIAgentWithSkill/
 
 The original implementation was intentionally limited because `llama3.2:3b` is too small for reliable automatic tool calling. It used a two-stage manual routing approach as a workaround. Now that we target Azure OpenAI GPT-4o-mini, we can use the standard SK agent pattern that the workaround was designed to emulate.
 
+https://green-hill-0b259a703.7.azurestaticapps.net/
+
 

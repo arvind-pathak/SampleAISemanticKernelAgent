@@ -265,8 +265,9 @@ az webapp config appsettings set \
 
 ```bash
 dotnet publish -c Release
+Compress-Archive -Path "bin\Release\net10.0\publish\*" -DestinationPath "publish.zip" -Force
 az login --tenant "f5bee52c-26bb-4685-9e60-bfdad5375f6f" --use-device-code
-az webapp deploy --name hr-agent-backend --resource-group rg-hr-agent-arvind --src-path ./publish.zip --type zip
+az webapp deploy --name hr-agent-backend --resource-group rg-hr-agent-arvind --src-path (Resolve-Path publish.zip).Path --type zip
 ```
 
 ### Step 6 — Deploy Angular frontend to Azure Static Web App

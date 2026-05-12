@@ -1,5 +1,10 @@
 # SampleAISemanticKernelAgent
 This usage SemanticKernel agent framework and demo basic of AI Agents 
+
+<img width="1501" height="887" alt="image" src="https://github.com/user-attachments/assets/0956c703-e6f4-4bc7-80c7-fa1417eb63eb" />
+<img width="1487" height="310" alt="image" src="https://github.com/user-attachments/assets/ffdfd69b-102e-4175-b7dc-76245682051f" />
+
+
 # Employee Support AI Agent
 
 > **v2 — Proper AI Agent with Semantic Kernel + Azure OpenAI**
